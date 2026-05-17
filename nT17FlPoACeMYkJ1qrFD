@@ -1,4 +1,5 @@
 -- Telegram @AnSitDev
+
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
@@ -328,15 +329,13 @@ Options.AutoCarry:SetValue(false)
 -----
 local TweenService = game:GetService("TweenService")
 
-warn("---------------------------------")
 print("Telegram : @AnSitDev")
 warn("---------------------------------")
-print("Thanks For Using <3")
-warn("---------------------------------")
+print("Thank For Using <3")
 
 local TWEEN_SPEED = 40
 local UP_Y = 50
-local HOME = Vector3.new(195, UP_Y, 320)
+local HOME = Vector3.new(195, UP_Y, 292)
 
 local C168 = 1
 
@@ -906,6 +905,60 @@ Tabs.Farm:AddToggle("AntiAFK", {
             end
 
         end
+    end
+})
+
+local function DumbAllNpc()
+    local Players = game:GetService("Players")
+    local lp = Players.LocalPlayer
+
+    pcall(function()
+        if sethiddenproperty then
+            sethiddenproperty(lp, "SimulationRadius", math.huge)
+        else
+            lp.SimulationRadius = math.huge
+        end
+    end)
+
+    local function punishNPC(npc)
+        local hrp = npc:FindFirstChild("HumanoidRootPart")
+        local hum = npc:FindFirstChildOfClass("Humanoid")
+
+        if hrp and hum then
+            if not Players:GetPlayerFromCharacter(npc) then
+                if not string.find(string.lower(npc.Name), "lucky block") then
+                    
+                    hrp.Anchored = false
+
+                    npc:PivotTo(CFrame.new(
+                        math.random(-50,50),
+                        1000,
+                        math.random(-50,50)
+                    ))
+
+                    hrp.Velocity = Vector3.new(0,200,0)
+                    hrp.RotVelocity = Vector3.new(999,999,999)
+
+                    hum:ChangeState(Enum.HumanoidStateType.Physics)
+                end
+            end
+        end
+    end
+
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") then
+            punishNPC(v)
+        end
+    end
+end
+
+Tabs.Main:AddButton({
+    Title = "Remove NPC",
+    Description = "Remove All Brainrot Boss",
+    Callback = function()
+        DumbAllNpc()
+        task.wait(2)
+        DumbAllNpc()
     end
 })
 
