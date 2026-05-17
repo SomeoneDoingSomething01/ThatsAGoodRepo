@@ -1,4 +1,4 @@
--- Telegram @AnSitDev
+-- Telegram : @AnSitDev
 
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
@@ -335,7 +335,7 @@ print("Thank For Using <3")
 
 local TWEEN_SPEED = 40
 local UP_Y = 50
-local HOME = Vector3.new(195, UP_Y, 292)
+local HOME = Vector3.new(195, UP_Y, 320)
 
 local C168 = 1
 
