@@ -336,7 +336,7 @@ warn("---------------------------------")
 
 local TWEEN_SPEED = 40
 local UP_Y = 50
-local HOME = Vector3.new(195, UP_Y, 300)
+local HOME = Vector3.new(195, UP_Y, 320)
 
 local C168 = 1
 
