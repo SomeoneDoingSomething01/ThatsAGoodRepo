@@ -413,7 +413,7 @@ local LocalPlayer = Players.LocalPlayer
 local Connection
 
 Tabs.Main:AddToggle("StayY300", {
-    Title = "FlyUp",
+    Title = "Safe Zone",
     Default = false,
     Callback = function(Value)
         if Connection then
@@ -429,8 +429,8 @@ Tabs.Main:AddToggle("StayY300", {
                 local HRP = Character:FindFirstChild("HumanoidRootPart")
                 if not HRP then return end
 
-                if HRP.Position.Y ~= 300 then
-                    HRP.CFrame = CFrame.new(HRP.Position.X, 300, HRP.Position.Z)
+                if HRP.Position.Y ~= 1 then
+                    HRP.CFrame = CFrame.new(HRP.Position.X, 1, HRP.Position.Z)
                 end
             end)
         end
