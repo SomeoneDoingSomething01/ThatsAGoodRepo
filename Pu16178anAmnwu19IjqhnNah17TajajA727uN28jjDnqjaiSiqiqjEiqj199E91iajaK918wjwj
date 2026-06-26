@@ -1,0 +1,501 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local Window = Fluent:CreateWindow({
+    Title = "Paint And Seek",
+    SubTitle = "Telegram : @AnSitDev",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(550, 430),
+    Acrylic = false,
+    Theme = "Amethyst",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+local Gui = Instance.new("ScreenGui")
+Gui.Parent = PlayerGui
+Gui.ResetOnSpawn = false
+
+local Button = Instance.new("TextButton")
+Button.Parent = Gui
+Button.Size = UDim2.new(0,70,0,70)
+Button.Position = UDim2.new(0,20,0.5,-35)
+Button.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Button.BorderSizePixel = 0
+Button.Text = "Close"
+Button.TextColor3 = Color3.fromRGB(0,0,0)
+Button.TextSize = 16
+Button.Font = Enum.Font.Creepster
+Button.TextStrokeTransparency = 0
+Button.TextStrokeColor3 = Color3.fromRGB(255,255,255)
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0,18)
+Corner.Parent = Button
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Parent = Button
+Stroke.Color = Color3.fromRGB(255,255,255)
+Stroke.Thickness = 2
+
+local Opened = true
+
+Button.MouseButton1Click:Connect(function()
+    Opened = not Opened
+
+    Window:Minimize(not Opened)
+
+    if Opened then
+        Button.Text = "Close"
+    else
+        Button.Text = "Open"
+    end
+end)
+
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+local function Update(input)
+    local delta = input.Position - dragStart
+
+    Button.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+end
+
+Button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Button.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+Button.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        Update(input)
+    end
+end)
+
+local Options = Fluent.Options
+local connections = {}
+
+do
+--------
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "eye" }),
+    Info = Window:AddTab({ Title = "Info", Icon = "info" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "cog" })
+}
+
+Tabs.Main:AddSection("Player")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local ESPEnabled = false
+local ESPObjects = {}
+
+local function removeESP(character)
+    if not character then return end
+
+    local h = character:FindFirstChild("ESP_Highlight")
+    if h then
+        h:Destroy()
+    end
+
+    local head = character:FindFirstChild("Head")
+    if head then
+        local gui = head:FindFirstChild("ESP_Name")
+        if gui then
+            gui:Destroy()
+        end
+    end
+end
+
+local function createESP(player, character)
+    if player == LocalPlayer then
+        return
+    end
+
+    removeESP(character)
+
+    local head = character:WaitForChild("Head",5)
+    if not head then
+        return
+    end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.Adornee = character
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.FillColor = Color3.fromRGB(150,150,150)
+    highlight.FillTransparency = 0.6
+    highlight.OutlineColor = Color3.fromRGB(255,255,255)
+    highlight.OutlineTransparency = 0
+    highlight.Parent = character
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP_Name"
+    billboard.Size = UDim2.new(0,100,0,20)
+    billboard.StudsOffset = Vector3.new(0,2.5,0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = head
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1,0,1,0)
+    label.BackgroundTransparency = 1
+    label.TextScaled = true
+    label.Font = Enum.Font.SourceSansBold
+    label.Text = "[ "..player.Name.." ]"
+    label.TextColor3 = Color3.fromRGB(0,255,0)
+    label.TextStrokeTransparency = 0
+    label.Parent = billboard
+end
+
+local function enableESP()
+    for _,player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+
+            if player.Character then
+                createESP(player,player.Character)
+            end
+
+            if not ESPObjects[player] then
+                ESPObjects[player] = player.CharacterAdded:Connect(function(char)
+                    task.wait(1)
+                    if ESPEnabled then
+                        createESP(player,char)
+                    end
+                end)
+            end
+        end
+    end
+end
+
+local function disableESP()
+    for _,player in ipairs(Players:GetPlayers()) do
+        if player.Character then
+            removeESP(player.Character)
+        end
+    end
+end
+
+Players.PlayerRemoving:Connect(function(player)
+    if ESPObjects[player] then
+        ESPObjects[player]:Disconnect()
+        ESPObjects[player] = nil
+    end
+end)
+
+Players.PlayerAdded:Connect(function(player)
+    if player == LocalPlayer then
+        return
+    end
+
+    ESPObjects[player] = player.CharacterAdded:Connect(function(char)
+        task.wait(1)
+        if ESPEnabled then
+            createESP(player,char)
+        end
+    end)
+
+    if ESPEnabled and player.Character then
+        createESP(player,player.Character)
+    end
+end)
+
+-- Main
+Tabs.Main:AddToggle("ESP",{
+    Title = "ESP",
+    Default = false
+}):OnChanged(function(Value)
+    ESPEnabled = Value
+
+    if Value then
+        enableESP()
+    else
+        disableESP()
+    end
+end)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local Noclip = false
+local Connection
+
+Tabs.Main:AddToggle("Noclip", {
+    Title = "Noclip",
+    Default = false,
+    Callback = function(Value)
+        Noclip = Value
+
+        if Value then
+            Connection = RunService.Stepped:Connect(function()
+                local Character = LocalPlayer.Character
+                if Character then
+                    for _, v in ipairs(Character:GetDescendants()) do
+                        if v:IsA("BasePart") then
+                            v.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        else
+            if Connection then
+                Connection:Disconnect()
+                Connection = nil
+            end
+
+            local Character = LocalPlayer.Character
+            if Character then
+                for _, v in ipairs(Character:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+})
+
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+
+local LocalPlayer = Players.LocalPlayer
+
+local InfiniteJump = false
+local JumpConnection
+
+Tabs.Main:AddToggle("InfiniteJump", {
+    Title = "Infinite Jump",
+    Default = false,
+
+    Callback = function(Value)
+        InfiniteJump = Value
+
+        if Value then
+            JumpConnection = UserInputService.JumpRequest:Connect(function()
+                local Character = LocalPlayer.Character
+                if Character then
+                    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+                    if Humanoid then
+                        Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
+                end
+            end)
+        else
+            if JumpConnection then
+                JumpConnection:Disconnect()
+                JumpConnection = nil
+            end
+        end
+    end
+})
+
+local RunService = game:GetService("RunService")
+local ManualTauntRemote = game:GetService("ReplicatedStorage"):WaitForChild("GameRemotes"):WaitForChild("ManualTaunt")
+
+Tabs.Main:AddSection("Farm")
+
+local tauntConnection
+
+Tabs.Main:AddToggle("AutoTaunt", {
+    Title = "Auto Taunt",
+    Default = false
+}):OnChanged(function(Value)
+    if Value then
+        local last = 0
+
+        tauntConnection = RunService.Heartbeat:Connect(function()
+            if tick() - last >= 5.1 then
+                last = tick()
+
+                pcall(function()
+                    ManualTauntRemote:FireServer()
+                end)
+            end
+        end)
+    else
+        if tauntConnection then
+            tauntConnection:Disconnect()
+            tauntConnection = nil
+        end
+    end
+end)
+
+Options.AutoTaunt:SetValue(false)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local CoinsFolder = workspace:WaitForChild("SpawnedCoins")
+
+local CoinMagnetConnection
+
+local function GetTorso()
+    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+    return Character:FindFirstChild("UpperTorso")
+        or Character:FindFirstChild("Torso")
+        or Character:FindFirstChild("HumanoidRootPart")
+end
+
+Tabs.Main:AddToggle("CoinMagnet", {
+    Title = "Auto Collect Coin",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            if CoinMagnetConnection then
+                CoinMagnetConnection:Disconnect()
+            end
+
+            CoinMagnetConnection = RunService.Heartbeat:Connect(function()
+                local Torso = GetTorso()
+                if not Torso then return end
+
+                for _, Coin in ipairs(CoinsFolder:GetChildren()) do
+                    if Coin:IsA("BasePart") then
+                        Coin.CFrame = Torso.CFrame
+                        Coin.AssemblyLinearVelocity = Vector3.zero
+                        Coin.AssemblyAngularVelocity = Vector3.zero
+                    elseif Coin:IsA("Model") then
+                        Coin:PivotTo(Torso.CFrame)
+                    end
+                end
+            end)
+        else
+            if CoinMagnetConnection then
+                CoinMagnetConnection:Disconnect()
+                CoinMagnetConnection = nil
+            end
+        end
+    end
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local Connection
+
+Tabs.Main:AddToggle("StayY300", {
+    Title = "FlyUp",
+    Default = false,
+    Callback = function(Value)
+        if Connection then
+            Connection:Disconnect()
+            Connection = nil
+        end
+
+        if Value then
+            Connection = RunService.Heartbeat:Connect(function()
+                local Character = LocalPlayer.Character
+                if not Character then return end
+
+                local HRP = Character:FindFirstChild("HumanoidRootPart")
+                if not HRP then return end
+
+                if HRP.Position.Y ~= 300 then
+                    HRP.CFrame = CFrame.new(HRP.Position.X, 300, HRP.Position.Z)
+                end
+            end)
+        end
+    end
+})
+
+local Players = game:GetService("Players")
+
+local AntiAFKConnection
+
+Tabs.Main:AddToggle("AntiAFK", {
+    Title = "Anti AFK",
+    Default = false,
+    Callback = function(Value)
+        if AntiAFKConnection then
+            AntiAFKConnection:Disconnect()
+            AntiAFKConnection = nil
+        end
+
+        if Value then
+            AntiAFKConnection = LocalPlayer.Idled:Connect(function()
+                local VirtualUser = game:GetService("VirtualUser")
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+            end)
+        end
+    end
+})
+
+-- Info
+
+Tabs.Info:AddParagraph({
+    Title = "Author",
+    Content = "Telegram : @AnSitDev"
+})
+
+Tabs.Info:AddButton({
+    Title = "Copy FB Link",
+    Description = "Facebook",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://facebook.com/AnSit.Developers")
+            Fluent:Notify({
+                Title = "Thanks for using",
+                Content = "<3",
+                Duration = 3
+            })
+        else
+            Fluent:Notify({
+                Title = "Error",
+                Content = "Executor doesnt support setclipboard.",
+                Duration = 3
+            })
+        end
+    end
+})
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+Window:SelectTab(1)
+SaveManager:LoadAutoloadConfig()
+end
