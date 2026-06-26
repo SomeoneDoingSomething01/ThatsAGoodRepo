@@ -358,6 +358,7 @@ end)
 
 Options.AutoTaunt:SetValue(false)
 
+-- A
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -405,6 +406,7 @@ Tabs.Main:AddToggle("CoinMagnet", {
         end
     end
 })
+-- A
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -429,8 +431,8 @@ Tabs.Main:AddToggle("StayY300", {
                 local HRP = Character:FindFirstChild("HumanoidRootPart")
                 if not HRP then return end
 
-                if HRP.Position.Y ~= 1 then
-                    HRP.CFrame = CFrame.new(HRP.Position.X, 1, HRP.Position.Z)
+                if HRP.Position.Y ~= 250 then
+                    HRP.CFrame = CFrame.new(HRP.Position.X, 250, HRP.Position.Z)
                 end
             end)
         end
